@@ -1,5 +1,6 @@
 package com.cs.test.juc;
 
+
 public class LockTest {
 	static int staticValue = 0;
 
@@ -7,7 +8,6 @@ public class LockTest {
 		final int max = 10;
 		final int loopCount = 100000;
 		long costTime = 0;
-
 		for (int m = 0; m < max; m++) {
 			long start1 = System.currentTimeMillis();
 			final AtomicIntegerWithLock value1 = new AtomicIntegerWithLock(0);

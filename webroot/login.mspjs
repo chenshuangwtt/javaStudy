@@ -1,0 +1,7 @@
+var login = function(name,password){
+	if(name=="admin"&&password=="12345"){
+		return " javascript login success";
+	}else{
+		return "javascript login failed";
+	}
+}
