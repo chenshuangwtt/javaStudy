@@ -12,7 +12,9 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
@@ -24,21 +26,27 @@ import groovy.lang.GroovyClassLoader;
 import groovy.lang.GroovyObject;
 
 public class HttpServer {
-
 	/**
 	 * WEB_ROOT是HTML和其它文件存放的目录. 这里的WEB_ROOT为工作目录下的webroot目录
 	 */
-	public static final String WEB_ROOT = System.getProperty("user.dir") + File.separator + "webroot";
+	public static final String WEB_ROOT = System.getProperty("user.dir") 
+										+ File.separator + "webroot";
 
-	// 关闭服务命令
-	private static final String SHUTDOWN_COMMAND = "/SHUTDOWN";
-
+	public static final  ConcurrentHashMap<String, Long> 
+								lastModifiedMap = new ConcurrentHashMap<>();
+	
 	public static void main(String[] args) {
 		HttpServer server = new HttpServer();
+		File dir = new File(WEB_ROOT);
+		if (dir.isDirectory()) {
+			File []  files =dir.listFiles();
+			for(int i=0;i<files.length;i++){
+				lastModifiedMap.put(files[i].getName(), 
+								files[i].lastModified());
+			}
+		}
 		// 等待连接请求
 		server.await();
-		// System.out.println(System.getProperty("user.dir") + File.separator +
-		// "webroot");
 	}
 
 	public void await() {
@@ -51,7 +59,6 @@ public class HttpServer {
 			e.printStackTrace();
 			System.exit(1);
 		}
-
 		// 循环等待一个请求
 		while (true) {
 			Socket socket = null;
@@ -66,13 +73,9 @@ public class HttpServer {
 				// 创建Request对象并解析
 				Request request = new Request(input);
 				request.parse();
-				// 检查是否是关闭服务命令
-				if (request.getUri().equals(SHUTDOWN_COMMAND)) {
-					break;
-				}
 				System.err.println(request.getUri());
-				String filepath = UrlPage(request.getUri());
-				Map<String, String> paramMap = URLRequest(request.getUri());
+				String filepath = HttpUtil.UrlPage(request.getUri());
+				Map<String, String> paramMap = HttpUtil.URLRequest(request.getUri());
 				System.out.println(filepath);
 				System.out.println(paramMap);
 				// 请求是msp的
@@ -84,13 +87,6 @@ public class HttpServer {
 					String res = (String) groovyObject.invokeMethod("loginAction",
 							new String[] { paramMap.get("name"), paramMap.get("password") });
 					System.out.println("res=" + res);
-					// GroovyScriptEngine groovyScriptEngine = new
-					// GroovyScriptEngine(HttpServer.WEB_ROOT);
-					// Binding binding = new Binding();
-					// for (String key : paramMap.keySet()) {
-					// binding.setVariable(key, paramMap.get(key));
-					// }
-					// groovyScriptEngine.run(filepath, binding);
 					// 创建 Response 对象
 					Response response = new Response(output);
 					response.setRequest(request);
@@ -103,7 +99,8 @@ public class HttpServer {
 						if (nashorn instanceof Invocable) {
 							// 调用JS方法
 							Invocable invocable = (Invocable) nashorn;
-							String result = (String) invocable.invokeFunction("login", new Object[] { paramMap.get("name"), paramMap.get("password")});
+							String result = (String) invocable.invokeFunction("login", new Object[] { 
+										paramMap.get("name"), paramMap.get("password")});
 							Response response = new Response(output);
 							response.setRequest(request);
 							response.output.write(result.getBytes());
@@ -112,9 +109,9 @@ public class HttpServer {
 						e.printStackTrace();
 					}
 				}else if(filepath.endsWith(".mspjava")){ 
-					JavaCompiler javaCompiler =ToolProvider.getSystemJavaCompiler();
-				
-				
+					JspPervlet jspPervlet = new JspPervlet();
+					Response response = new Response(output);
+					jspPervlet.handlerRequest(request, response);
 				}else{
 					// 创建 Response 对象
 					Response response = new Response(output);
@@ -123,76 +120,10 @@ public class HttpServer {
 				}
 				// 关闭 socket 对象
 				socket.close();
-
 			} catch (Exception e) {
 				e.printStackTrace();
 				continue;
 			}
 		}
-
-	}
-
-	/**
-	 * 解析出url参数中的键值对 如 "index.jsp?Action=del&id=123"，解析出Action:del,id:123存入map中
-	 * 
-	 * @param URL
-	 *            url地址
-	 * @return url请求参数部分
-	 */
-	public static Map<String, String> URLRequest(String URL) {
-		Map<String, String> mapRequest = new HashMap<String, String>();
-		String[] arrSplit = null;
-		String strUrlParam = TruncateUrlPage(URL);
-		if (strUrlParam == null) {
-			return mapRequest;
-		}
-		// 每个键值为一组
-		arrSplit = strUrlParam.split("[&]");
-		for (String strSplit : arrSplit) {
-			String[] arrSplitEqual = null;
-			arrSplitEqual = strSplit.split("[=]");
-
-			// 解析出键值
-			if (arrSplitEqual.length > 1) {
-				// 正确解析
-				mapRequest.put(arrSplitEqual[0], arrSplitEqual[1]);
-			} else {
-				if (arrSplitEqual[0] != "") {
-					// 只有参数没有值，不加入
-					mapRequest.put(arrSplitEqual[0], "");
-				}
-			}
-		}
-		return mapRequest;
-	}
-
-	private static String TruncateUrlPage(String strURL) {
-		String strAllParam = null;
-		String[] arrSplit = null;
-		strURL = strURL.trim().toLowerCase();
-		arrSplit = strURL.split("[?]");
-		if (strURL.length() > 1) {
-			if (arrSplit.length > 1) {
-				if (arrSplit[1] != null) {
-					strAllParam = arrSplit[1];
-				}
-			}
-		}
-		return strAllParam;
-	}
-
-	public static String UrlPage(String strURL) {
-		String strPage = null;
-		String[] arrSplit = null;
-		strURL = strURL.trim().toLowerCase();
-		arrSplit = strURL.split("[?]");
-		if (strURL.length() > 0) {
-			if (arrSplit.length > 1) {
-				if (arrSplit[0] != null) {
-					strPage = arrSplit[0];
-				}
-			}
-		}
-		return strPage;
 	}
 }

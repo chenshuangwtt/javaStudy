@@ -1,0 +1,1 @@
+public class login{	  public String  loginAction(String name,String password){    	if (name.equals("admin")&&password.equals("12345")) {			return "Welcome my big hero 666666666666662323232323";		}else{			return "aaaaaa  i'm sorry";		}    }}
