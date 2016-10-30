@@ -1,4 +1,4 @@
-package com.cs.test.week10;
+package com.cs.test.week10.buffer;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;
@@ -23,7 +23,7 @@ public class BufferCharView {
 
 	// Print info about a buffer
 	private static void println(Buffer buffer) {
-		System.out.println("pos=" + buffer.position() + ", limit=" + buffer.limit() + ", capacity=" + buffer.capacity()
-				+ ": '" + buffer.toString() + "'");
+		System.out.println("pos=" + buffer.position() + ", limit=" + buffer.limit() 
+		+ ", capacity=" + buffer.capacity()+ ": '" + buffer.toString() + "'");
 	}
 }

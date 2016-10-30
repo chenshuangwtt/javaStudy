@@ -1,4 +1,4 @@
-package com.cs.test.week10;
+package com.cs.test.week10.buffer;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;

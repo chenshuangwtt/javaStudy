@@ -1,5 +1,6 @@
 package com.cs.test.week10;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
@@ -48,7 +49,6 @@ public class MultiThreadNIOEchoServer {
 
 		@Override
 		public void run() {
-			// TODO Auto-generated method stub
 			EchoClient echoClient = (EchoClient) sk.attachment();
 			echoClient.enqueue(bb);
 			sk.interestOps(SelectionKey.OP_READ | SelectionKey.OP_WRITE);
@@ -94,7 +94,6 @@ public class MultiThreadNIOEchoServer {
 	}
 
 	private void doWrite(SelectionKey sk) {
-		// TODO Auto-generated method stub
 		SocketChannel channel = (SocketChannel) sk.channel();
 		EchoClient echoClient = (EchoClient) sk.attachment();
 		LinkedList<ByteBuffer> outq = echoClient.getOutputQueue();
@@ -143,7 +142,6 @@ public class MultiThreadNIOEchoServer {
 	}
 
 	private void doAccept(SelectionKey sk) {
-		// TODO Auto-generated method stub
 		ServerSocketChannel server = (ServerSocketChannel) sk.channel();
 		SocketChannel clientChannel;
 		try {
@@ -160,12 +158,11 @@ public class MultiThreadNIOEchoServer {
 	}
 
 	public static void main(String[] args) {
-		// TODO Auto-generated method stub
 		MultiThreadNIOEchoServer echoServer = new MultiThreadNIOEchoServer();
 		try {
 			echoServer.startServer();
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 	}
 }

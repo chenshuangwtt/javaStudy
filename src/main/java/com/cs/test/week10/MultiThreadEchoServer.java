@@ -11,7 +11,6 @@ import java.util.concurrent.Executors;
 
 public class MultiThreadEchoServer {
 	public static ExecutorService tp = Executors.newCachedThreadPool();
-
 	static class HandleMsg implements Runnable {
 		Socket clientSocket;
 
