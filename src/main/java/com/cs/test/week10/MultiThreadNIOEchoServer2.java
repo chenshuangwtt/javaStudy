@@ -17,17 +17,20 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class MultiThreadNIOEchoServer {
+public class MultiThreadNIOEchoServer2 {
 	public static Map<Socket, Long> geym_time_stat = new HashMap<Socket, Long>();
 
 	class EchoClient {
 		private LinkedList<ByteBuffer> outq;
+
 		EchoClient() {
 			outq = new LinkedList<ByteBuffer>();
 		}
+
 		public LinkedList<ByteBuffer> getOutputQueue() {
 			return outq;
 		}
+
 		public void enqueue(ByteBuffer bb) {
 			outq.addFirst(bb);
 		}
@@ -36,11 +39,13 @@ public class MultiThreadNIOEchoServer {
 	class HandleMsg implements Runnable {
 		SelectionKey sk;
 		ByteBuffer bb;
+
 		public HandleMsg(SelectionKey sk, ByteBuffer bb) {
 			super();
 			this.sk = sk;
 			this.bb = bb;
 		}
+
 		@Override
 		public void run() {
 			EchoClient echoClient = (EchoClient) sk.attachment();
@@ -52,7 +57,8 @@ public class MultiThreadNIOEchoServer {
 	}
 
 	private Selector selector;
-	private ExecutorService executorService = Executors.newCachedThreadPool();
+	private ExecutorService tp = Executors.newCachedThreadPool();
+
 	private void startServer() throws Exception {
 		selector = SelectorProvider.provider().openSelector();
 		ServerSocketChannel ssc = ServerSocketChannel.open();
@@ -94,36 +100,45 @@ public class MultiThreadNIOEchoServer {
 		try {
 			int len = channel.write(bb);
 			if (len == -1) {
+				disconnect(sk);
 				return;
 			}
 			if (bb.remaining() == 0) {
 				outq.removeLast();
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			// TODO: handle exception
+			disconnect(sk);
 		}
-		if (outq.size() == 0) {	//写完之后，更改感兴趣事件
+		if (outq.size() == 0) {
 			sk.interestOps(SelectionKey.OP_READ);
 		}
 	}
 
 	private void doRead(SelectionKey sk) {
+		// TODO Auto-generated method stub
 		SocketChannel channel = (SocketChannel) sk.channel();
 		ByteBuffer bb = ByteBuffer.allocate(8192);
 		int len;
 		try {
 			len = channel.read(bb);
 			if (len < 0) {
+				disconnect(sk);
 				return;
 			}
 		} catch (Exception e) {
-			e.printStackTrace();
+			// TODO: handle exception
+			disconnect(sk);
 			return;
 		}
-		bb.flip(); 
-		executorService.execute(new HandleMsg(sk, bb));
+		bb.flip();
+		tp.execute(new HandleMsg(sk, bb));  
 	}
 
+	private void disconnect(SelectionKey sk) {
+		// TODO Auto-generated method stub
+		// 省略略干关闭操作
+	}
 
 	private void doAccept(SelectionKey sk) {
 		ServerSocketChannel server = (ServerSocketChannel) sk.channel();
@@ -142,7 +157,7 @@ public class MultiThreadNIOEchoServer {
 	}
 
 	public static void main(String[] args) {
-		MultiThreadNIOEchoServer echoServer = new MultiThreadNIOEchoServer();
+		MultiThreadNIOEchoServer2 echoServer = new MultiThreadNIOEchoServer2();
 		try {
 			echoServer.startServer();
 		} catch (Exception e) {

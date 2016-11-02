@@ -14,7 +14,7 @@ public class Basic {
 		// int num = -1024;
 		// printInfo(num);
 		// printInfo(1024);
-		int a = 8192;
+		int a = 1024;
 		for (int i = 0; i < 32; i++) {
 			int t = (a & 0x80000000 >>> i) >>> (31 - i);
 			System.out.print(t);

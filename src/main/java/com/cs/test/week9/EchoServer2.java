@@ -48,7 +48,7 @@ public class EchoServer2 {
 					int writed = socketChannel.write(buffer);
 					System.out.println("writed:" + writed);
 					if (buffer.hasRemaining()) {
-						System.out.println("not write finished.remains" + buffer.remaining());
+						System.err.println("not write finished.remains" + buffer.remaining());
 						buffer = buffer.compact();
 						selectionKey.attach(buffer);
 						selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
@@ -65,7 +65,7 @@ public class EchoServer2 {
 						int writed = socketChannel.write(buffer);
 						System.out.println("writed:" + writed);
 						if (buffer.hasRemaining()) {
-							System.out.println("not write finished,bind to session,remains " + buffer.remaining());
+							System.err.println("not write finished,bind to session,remains " + buffer.remaining());
 							buffer = buffer.compact();
 							selectionKey.attach(buffer);
 							selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);

@@ -10,18 +10,34 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MultiThreadEchoServer {
-	public static ExecutorService tp = Executors.newCachedThreadPool();
+	public static ExecutorService executorService = Executors.newCachedThreadPool();
+	public static void main(String[] args) {
+		ServerSocket echoSocket = null;
+		Socket clientSocket = null;
+		try {
+			echoSocket = new ServerSocket(8000);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		while (true) {
+			try {
+				clientSocket = echoSocket.accept();
+				System.out.println(clientSocket.getRemoteSocketAddress()
+						+ " connect");
+				executorService.execute(new HandleMsg(clientSocket));
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	static class HandleMsg implements Runnable {
 		Socket clientSocket;
-
 		public HandleMsg(Socket clientSocket) {
 			this.clientSocket = clientSocket;
 		}
-
-		@Override
 		public void run() {
-			BufferedReader is = null;
-			PrintWriter os = null;
+			BufferedReader is = null;PrintWriter os = null;
 			try {
 				is = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
 				os = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -37,35 +53,13 @@ public class MultiThreadEchoServer {
 				e.printStackTrace();
 			} finally {
 				try {
-					if (is != null) {
-						is.close();
-					}
-					if (os != null) {
-						os.close();
-					}
+					if (is != null) {is.close();}
+					if (os != null) {os.close();}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
 	}
-
-	public static void main(String[] args) {
-		ServerSocket echoSocket = null;
-		Socket clientSocket = null;
-		try {
-			echoSocket = new ServerSocket(8000);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-		while (true) {
-			try {
-				clientSocket = echoSocket.accept();
-				System.out.println(clientSocket.getRemoteSocketAddress() + " connect");
-				tp.execute(new HandleMsg(clientSocket));
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-	}
+	
 }

@@ -20,7 +20,7 @@ class Reactor implements Runnable {
     Reactor(int port) throws IOException {
         selector = Selector.open();
         serverChannel = ServerSocketChannel.open();
-        serverChannel.socket().bind(new InetSocketAddress(port));
+        serverChannel.socket().bind(new InetSocketAddress("127.0.0.1",port));
         serverChannel.configureBlocking(false);
  
         // Register the server socket channel with interest-set set to ACCEPT operation
@@ -66,7 +66,7 @@ class Reactor implements Runnable {
         workerPool = Executors.newFixedThreadPool(WORKER_POOL_SIZE);
  
         try {
-            new Thread(new Reactor(9090)).start();
+            new Thread(new Reactor(9000)).start();
         }
         catch (IOException ex) {
             ex.printStackTrace();

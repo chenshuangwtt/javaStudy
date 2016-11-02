@@ -106,14 +106,14 @@ class ThreadHandlerChannel extends Thread{
                 buffer.clear();  
             }  
             baos.close();  
-            //System.out.println("服务器当前处理线程："+Thread.currentThread().getName()+" 服务端收到信息："+baos.toString()); 
+            System.out.println("服务器当前处理线程："+Thread.currentThread().getName()+" 服务端收到信息："+baos.toString()); 
             byte[] content=baos.toByteArray();
             ByteBuffer writeBuf = ByteBuffer.allocate(content.length);
             writeBuf.put(content);
             writeBuf.flip();
             channel.write(writeBuf);// 将消息回送给客户端  
             if(size==-1){
-                //System.out.println("客户端断开。。。"); 
+                System.out.println("客户端断开。。。"); 
                 channel.close();
             }else{
                 //没有可用字节,继续监听OP_READ

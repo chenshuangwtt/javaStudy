@@ -46,7 +46,7 @@ public class EchoServer {
 					socketChannel.read(buffer);
 					int writeBufferSize = socketChannel.socket().getReceiveBufferSize();
 					System.out.println("send buffer size:" + writeBufferSize);
-					buffer = ByteBuffer.allocate(writeBufferSize * 5 + 2);
+					buffer = ByteBuffer.allocate(writeBufferSize * 1000 + 2);
 					for (int i = 0; i < buffer.capacity()-2; i++) {
 						buffer.put((byte) ('a' + i % 25));
 					}
@@ -58,8 +58,9 @@ public class EchoServer {
 						System.out.println("not write finished.remains" + buffer.remaining());
 					}
 				}
+				iterator.remove();
 			}
-			iterator.remove();
+			
 		}
 	}
 }
