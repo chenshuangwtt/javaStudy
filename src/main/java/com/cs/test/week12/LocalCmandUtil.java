@@ -5,25 +5,28 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class LocalCmandUtil {
+
 	public static String callCmdAndgetResult(String cmd) {
 		StringBuilder result = new StringBuilder();
 		try {
-			ProcessBuilder processBuilder = new ProcessBuilder(cmd.split("\\s")); // 创建进程管理实例
-			Process process = processBuilder.start(); // 启动线程
-			InputStream inputStream = process.getInputStream(); // 获取输入流
-			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, "GBK");
-			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
+			ProcessBuilder pb = new ProcessBuilder(cmd.split("\\s"));// 创建进程管理实例
+			Process process = pb.start();// 启动进程
+			InputStream is = process.getInputStream(); // 获得输入流
+			InputStreamReader isr = new InputStreamReader(is, "GBK");
+			BufferedReader br = new BufferedReader(isr);
 			String line;
-			while ((line = bufferedReader.readLine()) != null) { // 循环读取数据
+			while ((line = br.readLine()) != null) {// 循环读取数据
 				result.append(line);
 			}
-			inputStream.close();
-			inputStreamReader.close();
-			bufferedReader.close();
+			is.close();
+			isr.close();
+			br.close();
 			process.waitFor();
-		} catch (Exception e) {
+		} catch (Exception e) {// 捕获异常
 			result.append(e.toString());
 		}
 		return result.toString();
+
 	}
+
 }

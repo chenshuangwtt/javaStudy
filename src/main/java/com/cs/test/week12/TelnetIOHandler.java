@@ -13,21 +13,25 @@ public class TelnetIOHandler extends IOHandler {
 	}
 
 	private int lastMessagePos;
-
+	
 	@Override
 	public void onConnected() throws IOException {
-		System.out.println("connected  from " + this.socketChannel.getRemoteAddress());
-		this.writeData("Welcome basara ...\r\nTelnet>".getBytes());
+        System.out.println("connected  from "+this.socketChannel.getRemoteAddress() );
+		this.writeData("Welcome Leader.us Power Man Java Course ...\r\nTelnet>".getBytes());
+
 	}
 
+	
+	
 	@Override
 	public void doHandler() throws IOException {
+		 //System.out.println("readed ");
 		socketChannel.read(readBuffer);
 		int readEndPos = readBuffer.position();
 		String readedLine = null;
 		for (int i = lastMessagePos; i < readEndPos; i++) {
 			// System.out.println(readBuffer.get(i));
-			if (readBuffer.get(i) == 13) { // a line finished
+			if (readBuffer.get(i) == 13) {// a line finished
 				byte[] lineBytes = new byte[i - lastMessagePos];
 				readBuffer.position(lastMessagePos);
 				readBuffer.get(lineBytes);
@@ -43,6 +47,7 @@ public class TelnetIOHandler extends IOHandler {
 			selectionKey.interestOps(selectionKey.interestOps() & ~SelectionKey.OP_READ);
 			// 处理指令
 			processCommand(readedLine);
+
 		}
 		if (readBuffer.position() > readBuffer.capacity() / 2) {// 清理前面读过的废弃空间
 			System.out.println(" rewind read byte buffer ,get more space  " + readBuffer.position());
@@ -51,8 +56,8 @@ public class TelnetIOHandler extends IOHandler {
 			readBuffer.compact();
 			lastMessagePos = 0;
 		}
-	}
 
+	}
 	private void processCommand(String readedLine) throws IOException {
 		byte[] data=null;
 		if (readedLine.startsWith("dir")) {
@@ -68,5 +73,7 @@ public class TelnetIOHandler extends IOHandler {
 			tempBuf.put("\r\nTelnet>".getBytes());
 		}
 		this.writeData(data);
+
 	}
+
 }

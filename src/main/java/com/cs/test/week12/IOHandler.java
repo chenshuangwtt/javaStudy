@@ -26,28 +26,31 @@ public abstract class IOHandler implements Runnable {
 		this.onConnected();
 	}
 
-	public abstract void onConnected() throws IOException;
+	public abstract void onConnected()  throws IOException ;
 
 	public abstract void doHandler() throws IOException;
 
 	public void writeData(byte[] data) throws IOException {
 		while (!writingFlag.compareAndSet(false, true)) {
-			// 等待直到释放
+			// wait until release
 		}
 		try {
 			ByteBuffer theWriteBuf = writeBuffer;
-			if (theWriteBuf == null && writeQueue.isEmpty()) {
+			if (theWriteBuf==null && writeQueue.isEmpty()) {
 				writeToChannel(ByteBuffer.wrap(data));
 			} else {
 				writeQueue.add(ByteBuffer.wrap(data));
 				writeToChannel(theWriteBuf);
 			}
+			
 		} finally {
+			// release
 			writingFlag.lazySet(false);
+
 		}
+
 	}
 
-	@Override
 	public void run() {
 		try {
 			if (selectionKey.isReadable()) {
@@ -55,25 +58,30 @@ public abstract class IOHandler implements Runnable {
 			} else if (selectionKey.isWritable()) {
 				doWriteData();
 			}
+
 		} catch (Exception e) {
 			e.printStackTrace();
 			selectionKey.cancel();
 			try {
 				socketChannel.close();
-			} catch (Exception e2) {
-				e2.printStackTrace();
+			} catch (IOException e1) {
+				e1.printStackTrace();
 			}
 		}
+
 	}
 
 	private void doWriteData() throws IOException {
 		try {
 			while (!writingFlag.compareAndSet(false, true)) {
+				// wait until release
 			}
 			ByteBuffer theWriteBuf = writeBuffer;
 			writeToChannel(theWriteBuf);
 		} finally {
+			// release
 			writingFlag.lazySet(false);
+
 		}
 	}
 
@@ -84,19 +92,22 @@ public abstract class IOHandler implements Runnable {
 			System.out.println("writed " + writed + " not write finished ,remains " + curBuffer.remaining());
 			selectionKey.interestOps(selectionKey.interestOps() | SelectionKey.OP_WRITE);
 			if (curBuffer != this.writeBuffer) {
-				writeBuffer = curBuffer;
+				writeBuffer=curBuffer;
 			}
 		} else {
 			System.out.println(" block write finished ");
-			writeBuffer = null;
+			writeBuffer=null;
 			if (writeQueue.isEmpty()) {
 				System.out.println(" .... write finished  ,no more data ");
-				selectionKey.interestOps((selectionKey.interestOps() & ~SelectionKey.OP_WRITE) | SelectionKey.OP_READ);
+				selectionKey.interestOps((selectionKey.interestOps() & ~SelectionKey.OP_WRITE)|SelectionKey.OP_READ);
+				
 			} else {
-				ByteBuffer buffer = writeQueue.removeFirst();
-				buffer.flip();
-				writeToChannel(buffer);
+				ByteBuffer buf = writeQueue.removeFirst();
+				buf.flip();
+				writeToChannel(buf);
+
 			}
 		}
 	}
+
 }
