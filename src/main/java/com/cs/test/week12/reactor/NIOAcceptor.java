@@ -1,4 +1,4 @@
-package com.cs.test.week12;
+package com.cs.test.week12.reactor;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -13,7 +13,7 @@ public class NIOAcceptor extends Thread {
 	public NIOAcceptor(int bindPort,MyNIORector[] reactors) throws IOException{
 		this.reactors = reactors;
 		serverSocketChannel = ServerSocketChannel.open();
-		serverSocketChannel.configureBlocking(true);
+		serverSocketChannel.configureBlocking(false);
 		InetSocketAddress   address = new InetSocketAddress(bindPort);
 		serverSocketChannel.socket().bind(address);
 		System.out.println("started at " + address);

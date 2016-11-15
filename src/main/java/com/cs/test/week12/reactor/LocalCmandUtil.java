@@ -1,11 +1,10 @@
-package com.cs.test.week12;
+package com.cs.test.week12.reactor;
 
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
 public class LocalCmandUtil {
-
 	public static String callCmdAndgetResult(String cmd) {
 		StringBuilder result = new StringBuilder();
 		try {
@@ -26,7 +25,6 @@ public class LocalCmandUtil {
 			result.append(e.toString());
 		}
 		return result.toString();
-
 	}
 
 }

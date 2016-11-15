@@ -28,8 +28,13 @@ public class SearchResult {
 					return o2.getValue().compareTo(o1.getValue());
 				}
 			});
+			int i=0;
 			for (Map.Entry<String, Integer> temp : list) {
+				if (i==10) {
+					break;
+				}
 				mapstr += temp.getKey() + "-------出现次数" + temp.getValue() + "\n";
+				i++;
 			}
 		}
 		return "SearchResult [searchText=" + searchText + ", count=" + count + ", maps=" + mapstr + "]";

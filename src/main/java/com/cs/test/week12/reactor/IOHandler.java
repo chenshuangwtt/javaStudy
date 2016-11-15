@@ -1,4 +1,4 @@
-package com.cs.test.week12;
+package com.cs.test.week12.reactor;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -42,13 +42,10 @@ public abstract class IOHandler implements Runnable {
 				writeQueue.add(ByteBuffer.wrap(data));
 				writeToChannel(theWriteBuf);
 			}
-			
 		} finally {
 			// release
 			writingFlag.lazySet(false);
-
 		}
-
 	}
 
 	public void run() {
@@ -68,7 +65,6 @@ public abstract class IOHandler implements Runnable {
 				e1.printStackTrace();
 			}
 		}
-
 	}
 
 	private void doWriteData() throws IOException {
@@ -81,7 +77,6 @@ public abstract class IOHandler implements Runnable {
 		} finally {
 			// release
 			writingFlag.lazySet(false);
-
 		}
 	}
 
@@ -100,12 +95,10 @@ public abstract class IOHandler implements Runnable {
 			if (writeQueue.isEmpty()) {
 				System.out.println(" .... write finished  ,no more data ");
 				selectionKey.interestOps((selectionKey.interestOps() & ~SelectionKey.OP_WRITE)|SelectionKey.OP_READ);
-				
 			} else {
 				ByteBuffer buf = writeQueue.removeFirst();
 				buf.flip();
 				writeToChannel(buf);
-
 			}
 		}
 	}
